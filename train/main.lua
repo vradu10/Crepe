@@ -5,15 +5,13 @@ By Xiang Zhang @ New York University
 
 -- Necessary functionalities
 require("nn")
-require("cutorch")
-require("cunn")
 require("gnuplot")
 
 -- Local requires
 require("data")
 require("model")
 require("train")
-require("test")
+require("tester")
 require("mui")
 
 -- Configurations
@@ -28,12 +26,6 @@ main = {}
 
 -- The main program
 function main.main()
-   -- Setting the device
-   if config.main.device then
-      cutorch.setDevice(config.main.device)
-      print("Device set to "..config.main.device)
-   end
-
    main.clock = {}
    main.clock.log = 0
 
@@ -84,6 +76,21 @@ end
 
 -- Train a new experiment
 function main.new()
+
+   -- detect the model type
+   if config.main.type == "torch.CudaTensor" then
+      require("cutorch")
+      require("cunn")
+   else
+      config.main.device = nil
+   end
+
+   -- Setting the device
+   if config.main.device then
+      cutorch.setDevice(config.main.device)
+      print("Device set to "..config.main.device)
+   end
+
    -- Load the data
    print("Loading datasets...")
    main.train_data = Data(config.train_data)
@@ -96,6 +103,8 @@ function main.new()
       main.model:randomize(config.main.randomize)
       print("Model randomized.")
    end
+
+   -- set the model type
    main.model:type(config.main.type)
    print("Current model type: "..main.model:type())
    collectgarbage()
@@ -116,12 +125,14 @@ function main.new()
       local resume = torch.load(config.main.resume)
       main.record = resume.record
       if resume.momentum then main.train.old_grads:copy(resume.momentum) end
-      main.show()
+      if config.main.visualization then main.show() end
    end
 
    -- The visualization
-   main.mui = Mui{width=config.mui.width,scale=config.mui.scale,n=config.mui.n,title="Model Visualization"}
-   main.draw()
+   if config.main.visualization then 
+      main.mui = Mui{width=config.mui.width,scale=config.mui.scale,n=config.mui.n,title="Model Visualization"}
+      main.draw()
+   end
    collectgarbage()
 end
 

@@ -83,7 +83,7 @@ config.mui.n = 16
 
 -- Main program
 config.main = {}
-config.main.type = "torch.CudaTensor"
+config.main.type = "torch.FloatTensor"
 config.main.eras = 10
 config.main.epoches = 5000
 config.main.randomize = 5e-2
@@ -95,3 +95,4 @@ config.main.collectgarbage = 100
 config.main.logtime = 5
 config.main.debug = false
 config.main.test = true
+config.main.visualization = false
